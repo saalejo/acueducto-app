@@ -2,10 +2,17 @@
   <div class="q-pa-md" v-if="ruta && selected">
     <q-card>
       <q-card-section>
-        <div class="text-h6">{{ ruta.vereda }}</div>
-        <div class="text-subtitle2">{{ ruta.codigo }}</div>
-        <div class="text-subtitle2">{{ ruta.fecha }}</div>
-        <div class="text-subtitle2"></div>
+        <div class="row">
+          <div class="col-12 text-h6">
+            {{ ruta.vereda }}
+          </div>
+          <div class="col-6 text-subtitle2">
+            {{ ruta.fecha }}
+          </div>
+          <div class="col-6 text-subtitle2">
+            Avance: {{ (avance.length/ruta.lecturas.length*100).toFixed(2) }}%
+          </div>
+        </div>
       </q-card-section>
       <q-card-section>
         <div class="row">
@@ -49,6 +56,11 @@
       </q-card-section>
       <q-separator dark />
       <q-card-actions align="right">
+        <q-btn
+          flat
+          @click="terminar()">
+          Guardar
+        </q-btn>
         <q-btn
           flat
           @click="siguiente(-1)"
@@ -120,6 +132,7 @@
     storeLectura.modificar(element);
   });
 
+  const avance = ref(computed(() => ruta.value.lecturas.filter((e: any) => typeof Number(e.lectura) == "number" && Number(e.lectura)> 0 )));
   const next = (direccion: number) => {
     const lectura = ruta.value.lecturas.find((l: any) => l.id == selected.value.id)
     const index = ruta.value.lecturas.indexOf(lectura);
@@ -139,17 +152,18 @@
   };
 
   const terminar = () => {
-    const url = '/lecturas_guardar/'
+    const url = '/guardar_ruta/'
     const abstract = (l: any) => {
-      return { id: l.id, 'lectura': l.lectura }
+      return { id: l.id, lectura: l.lectura }
     }
     const data = {
-      ruta_id: ruta.value.id,
-      lecturas: ruta.value.lecturas.map(abstract)
+      'ruta_id': ruta.value.id,
+      'lecturas': ruta.value.lecturas.map(abstract)
     }
     api.post(url, data).then((response: any) => {
-      storeRuta.modificar(null);
-      storeLectura.modificar(null);
+      console.log(response);
+      // storeRuta.modificar(null);
+      // storeLectura.modificar(null);
     }).catch((error: any) => {
       console.log(error);
     });
