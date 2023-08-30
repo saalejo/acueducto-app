@@ -2,13 +2,13 @@ import { defineStore } from 'pinia';
 
 export const useRutaStore = defineStore('ruta', {
   state: () => ({
-    ruta: null,
+    ruta: [],
   }),
   getters: {
     obtener: (state) => state.ruta,
   },
   actions: {
-    modificar(ruta) {
+    modificar(ruta: any) {
       this.ruta = ruta;
     },
   },

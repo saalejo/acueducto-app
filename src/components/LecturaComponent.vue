@@ -3,14 +3,17 @@
     <q-card>
       <q-card-section>
         <div class="row">
-          <div class="col-12 text-h6">
+          <div class="col-6 text-h6">
             {{ ruta.vereda }}
+          </div>
+          <div class="col-6 text-subtitle2">
+            Avance: {{ (avance.length/ruta.lecturas.length*100).toFixed(2) }}%
           </div>
           <div class="col-6 text-subtitle2">
             {{ ruta.fecha }}
           </div>
           <div class="col-6 text-subtitle2">
-            Avance: {{ (avance.length/ruta.lecturas.length*100).toFixed(2) }}%
+            Terminado: {{ avance.length }} / {{ ruta.lecturas.length }}
           </div>
         </div>
       </q-card-section>
@@ -42,7 +45,7 @@
             <q-input outlined v-model="selected.consumo.lecant" label="Anterior lectura" readonly/>
           </div>
           <div class="col-8 q-pa-sm">
-            <q-input mask="#####.#" outlined v-model="selected.lectura" label="Lectura"/>
+            <q-input type="number" outlined v-model="selected.lectura" label="Lectura"/>
           </div>
           <div class="col-12 q-pa-sm">
             <div v-if="consumo >= 0" class="text-subtitle2 float-right">
@@ -58,11 +61,6 @@
       <q-card-actions align="right">
         <q-btn
           flat
-          @click="terminar()">
-          Guardar
-        </q-btn>
-        <q-btn
-          flat
           @click="siguiente(-1)"
           v-if="ruta.lecturas.indexOf(selected) > 0">
           Anterior
@@ -75,7 +73,7 @@
         </q-btn>
         <q-btn
           flat
-          @click="terminar()"
+          @click="guardar(true)"
           v-if="ruta.lecturas.indexOf(selected) == ruta.lecturas.length - 1">
           Finalizar
         </q-btn>
@@ -106,6 +104,11 @@
   import { useSectoresStore } from 'stores/sectores-store';
   import { api } from 'boot/axios';
   import HistorialComponent from 'components/HistorialComponent.vue';
+  import { onBeforeRouteLeave, useRouter } from 'vue-router'
+  import { useQuasar } from 'quasar'
+
+  const $q = useQuasar()
+  const router = useRouter()
   const modal = ref(false);
   const confirm = ref(false);
   const dirTemp = ref(1);
@@ -118,21 +121,21 @@
   const sector = ref(sectores.value[0]);
   const consumo = ref(computed(() => Number(selected.value.lectura) - Number(selected.value.consumo.lecant)));
   
-  const compare = (a: any, b: any) => {
-    if (a.consumo.sector < b.consumo.sector) {
-      return -1;
-    }
-    if (a.consumo.sector > b.consumo.sector) {
-      return 1;
-    }
-    return 0;
-  }
-  watch(sector, (value) => {
+  watch(sector, () => {
     const element = ruta.value.lecturas.find((e: any) => e.consumo.sector == sector.value);
     storeLectura.modificar(element);
   });
 
-  const avance = ref(computed(() => ruta.value.lecturas.filter((e: any) => typeof Number(e.lectura) == "number" && Number(e.lectura)> 0 )));
+  const avance = ref(computed(() => {
+    if (ruta.value) {
+      return ruta.value.lecturas.filter(
+        (e: any) => typeof Number(e.lectura) == "number" && Number(e.lectura)> 0 
+      );
+    }else {
+        return 0;
+    }  
+  }));
+
   const next = (direccion: number) => {
     const lectura = ruta.value.lecturas.find((l: any) => l.id == selected.value.id)
     const index = ruta.value.lecturas.indexOf(lectura);
@@ -143,7 +146,7 @@
   };
 
   const siguiente = (direccion: number) => {
-    if (consumo.value < 1) {
+    if (consumo.value < 0) {
       confirm.value = true;
       dirTemp.value = direccion;
     } else {
@@ -151,21 +154,33 @@
     }
   };
 
-  const terminar = () => {
-    const url = '/guardar_ruta/'
-    const abstract = (l: any) => {
-      return { id: l.id, lectura: l.lectura }
+  const guardar = (terminar=false) => {
+    if (ruta.value) {
+      $q.loading.show();
+      const url = '/guardar_ruta/'
+      const abstract = (l: any) => {
+        return { id: l.id, lectura: l.lectura }
+      }
+      const data = {
+        'terminar': terminar,
+        'ruta_id': ruta.value.id,
+        'lecturas': ruta.value.lecturas.map(abstract)
+      }
+      api.post(url, data).then((response: any) => {
+        console.log(response);
+        storeRuta.modificar(null);
+        storeLectura.modificar(null);
+        router.push({ path: '/ruta' })
+      }).catch((error: any) => {
+        console.log(error);
+      }).finally(() => {
+        $q.loading.hide()
+        router.push({ path: '/' })
+      });
     }
-    const data = {
-      'ruta_id': ruta.value.id,
-      'lecturas': ruta.value.lecturas.map(abstract)
-    }
-    api.post(url, data).then((response: any) => {
-      console.log(response);
-      // storeRuta.modificar(null);
-      // storeLectura.modificar(null);
-    }).catch((error: any) => {
-      console.log(error);
-    });
   };
+
+  onBeforeRouteLeave( () => {
+    guardar(false);
+  });
 </script>

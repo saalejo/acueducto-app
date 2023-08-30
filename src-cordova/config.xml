@@ -2,7 +2,7 @@
 <widget id="org.cordova.quasar.app" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Acueducto App</name>
     <platform name="android">
-        <icon src="www/icons/icon.png" />
+        <icon src="www/icons/logo_app.jpeg" />
     </platform>
     <description>Movile app for reading consumption</description>
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">

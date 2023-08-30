@@ -5,7 +5,7 @@
         <q-toolbar-title>
           Acueducto
         </q-toolbar-title>
-        <busqueda-component/>
+        <q-btn flat :to="{ path: '/' }" icon="route"/>
         <configuracion-component/>
       </q-toolbar>
     </q-header>
@@ -18,5 +18,4 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import ConfiguracionComponent from 'components/ConfiguracionComponent.vue';
-import BusquedaComponent from 'components/BusquedaComponent.vue';
 </script>

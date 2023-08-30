@@ -20,6 +20,11 @@
               <q-input outlined v-model="configuracion.api_uri" label="Api uri" />
             </div>
           </div>
+          <div class="row">
+            <div class="col q-pa-sm">
+              <q-input type="password" outlined v-model="configuracion.token" label="Token" />
+            </div>
+          </div>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
