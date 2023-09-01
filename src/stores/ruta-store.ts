@@ -12,5 +12,4 @@ export const useRutaStore = defineStore('ruta', {
       this.ruta = ruta;
     },
   },
-  persist: true,
 });

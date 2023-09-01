@@ -61,6 +61,11 @@
       <q-card-actions align="right">
         <q-btn
           flat
+          @click="confirmSave = true">
+          Guardar
+        </q-btn>
+        <q-btn
+          flat
           @click="siguiente(-1)"
           v-if="ruta.lecturas.indexOf(selected) > 0">
           Anterior
@@ -70,12 +75,6 @@
           @click="siguiente(1)"
           v-if="ruta.lecturas.indexOf(selected) < ruta.lecturas.length - 1">
           Siguiente
-        </q-btn>
-        <q-btn
-          flat
-          @click="guardar(true)"
-          v-if="ruta.lecturas.indexOf(selected) == ruta.lecturas.length - 1">
-          Finalizar
         </q-btn>
       </q-card-actions>
     </q-card>
@@ -94,28 +93,47 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="confirmSave">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="info" color="primary" text-color="white" />
+          <span class="q-ml-sm">
+            ¿Deseas guardar y terminar la ruta, o solo guardar y continuar editando?
+          </span>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Terminar" color="secondary" v-close-popup @click="guardar(true)"/>
+          <q-btn flat label="Guardar" color="primary" v-close-popup @click="guardar()"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch } from 'vue';
+  import { ref, computed, watch, onMounted } from 'vue';
   import { useRutaStore } from 'stores/ruta-store';
   import { useLecturaStore } from 'stores/lectura-store';
   import { useSectoresStore } from 'stores/sectores-store';
   import { api } from 'boot/axios';
   import HistorialComponent from 'components/HistorialComponent.vue';
-  import { onBeforeRouteLeave, useRouter } from 'vue-router'
+  import { useRouter } from 'vue-router'
   import { useQuasar } from 'quasar'
+  import { useRutasStore } from 'src/stores/rutas-store';
+  import { errorMessage } from 'src/boot/messages'
 
   const $q = useQuasar()
   const router = useRouter()
   const modal = ref(false);
   const confirm = ref(false);
+  const confirmSave = ref(false);
   const dirTemp = ref(1);
   const storeRuta = useRutaStore();
+  const storeRutas = useRutasStore();
   const storeLectura = useLecturaStore();
   const storeSectores = useSectoresStore();
   const ruta = ref(computed(() => storeRuta.obtener));
+  const rutas = ref(computed(() => storeRutas.obtener));
   const selected = ref(computed(() => storeLectura.obtener));
   const sectores = ref(computed(() => storeSectores.obtener));
   const sector = ref(sectores.value[0]);
@@ -167,20 +185,17 @@
         'lecturas': ruta.value.lecturas.map(abstract)
       }
       api.post(url, data).then((response: any) => {
-        console.log(response);
-        storeRuta.modificar(null);
-        storeLectura.modificar(null);
-        router.push({ path: '/ruta' })
-      }).catch((error: any) => {
-        console.log(error);
+        if(terminar) {
+          console.log(response);
+          storeRuta.modificar(null);
+          storeLectura.modificar(null);
+          router.push({ path: '/ruta' })
+        }
+      }).catch(() => {
+        $q.notify(errorMessage);
       }).finally(() => {
         $q.loading.hide()
-        router.push({ path: '/' })
       });
     }
   };
-
-  onBeforeRouteLeave( () => {
-    guardar(false);
-  });
 </script>

@@ -5,7 +5,7 @@ export const useRutasStore = defineStore('rutas', {
     rutas: null,
   }),
   getters: {
-    obtener: (state) => state.rutas,
+    obtener: (state) => state.rutas || [],
   },
   actions: {
     modificar(rutas:any) {

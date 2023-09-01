@@ -58,6 +58,7 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
+      // publicPath: '/static/spa',
       target: {
         browser: [ 'es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1' ],
         node: 'node16'
@@ -121,7 +122,8 @@ module.exports = configure(function (/* ctx */) {
       plugins: [
         'LocalStorage',
         'Loading',
-        'SessionStorage'
+        'SessionStorage',
+        'Notify'
       ]
     },
 
