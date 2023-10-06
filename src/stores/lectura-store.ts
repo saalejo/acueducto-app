@@ -12,4 +12,5 @@ export const useLecturaStore = defineStore('lectura', {
       this.lectura = lectura;
     },
   },
+  persist: true,
 });

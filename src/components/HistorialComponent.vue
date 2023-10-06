@@ -58,7 +58,7 @@
               </q-item>
               <q-item clickable v-ripple>
                 <q-item-section>
-                  <q-item-label>{{ selected.consumo.consepteimbre }}</q-item-label>
+                  <q-item-label>{{ selected.consumo.conseptiem }}</q-item-label>
                   <q-item-label caption>Septiembre</q-item-label>
                 </q-item-section>
               </q-item>
@@ -70,13 +70,13 @@
               </q-item>
               <q-item clickable v-ripple>
                 <q-item-section>
-                  <q-item-label>{{ selected.consumo.connoviembre}}</q-item-label>
+                  <q-item-label>{{ selected.consumo.connoviemb}}</q-item-label>
                   <q-item-label caption>Noviembre</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item clickable v-ripple>
                 <q-item-section>
-                  <q-item-label>{{ selected.consumo.condiciembre }}</q-item-label>
+                  <q-item-label>{{ selected.consumo.condiciemb }}</q-item-label>
                   <q-item-label caption>Diciembre</q-item-label>
                 </q-item-section>
               </q-item>

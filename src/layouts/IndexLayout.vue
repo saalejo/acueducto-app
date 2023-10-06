@@ -3,7 +3,6 @@
     <q-header elevated>
       <q-toolbar>
         <q-toolbar-title>
-          <q-img src="/public/icons/logo_app.jpeg" width="20px"/>
           Acueducto
         </q-toolbar-title>
         <q-btn flat :to="{ path: '/' }" icon="route"/>

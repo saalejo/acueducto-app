@@ -21,6 +21,10 @@
         </q-item-section>
       </q-item>
     </q-list>
+    <q-img no-spinner
+      style="max-width: 300px;"
+      v-if="configuracion.api_uri"
+      :src="configuracion.api_uri + '/static/img/logo.png'"/>
   </div>
 </template>
 
@@ -50,8 +54,11 @@
 
   const loadLectura = (ruta: any) => {
     if (ruta.rutaStore) {
+      const s = ruta.rutaStore.next ? ruta.rutaStore.next : ruta.rutaStore.lecturas[0];
+      const t = ruta.rutaStore.lecturas.find((l: any) => l.id == s.id);
+
       storeRuta.modificar(ruta.rutaStore);
-      storeLectura.modificar(ruta.rutaStore.lecturas[0]);
+      storeLectura.modificar(t);
       ruta.rutaStore.selected = true;
       ruta.rutaStore.lecturas.forEach((el: any) => {
         if (!sectores.value.includes(el.consumo.sector)) {

@@ -28,21 +28,23 @@
           <div class="col-8 q-pa-sm">
             <q-select outlined v-model="sector" :options="sectores" label="Sector"/>
           </div>
-          <div class="col-4 q-pa-sm">
-            <q-input outlined v-model="selected.cliente.codcte" label="Codigo" readonly/>
-          </div>
-          <div class="col-8 q-pa-sm">
-            <q-input outlined v-model="selected.cliente.nomcte" label="Nombre" readonly/>
-          </div>
-          <div class="col-4 q-pa-sm">
-            <q-input outlined v-model="selected.cliente.estrato" label="Estrato" readonly/>
-          </div>
-          <div class="col-8 q-pa-sm">
-            <q-input outlined v-model="selected.cliente.telcte" label="Telefono" readonly/>
-          </div>
+          <template v-if="selected.cliente">
+            <div class="col-4 q-pa-sm">
+              <q-input outlined v-model="selected.cliente.codcte" label="Codigo" readonly/>
+            </div>
+            <div class="col-8 q-pa-sm">
+              <q-input outlined v-model="selected.cliente.nomcte" label="Nombre" readonly/>
+            </div>
+            <div class="col-4 q-pa-sm">
+              <q-input outlined v-model="selected.cliente.estrato" label="Estrato" readonly/>
+            </div>
+            <div class="col-8 q-pa-sm">
+              <q-input outlined v-model="selected.cliente.telcte" label="Telefono" readonly/>
+            </div>
+          </template>
           <q-space/>
           <div class="col-4 q-pa-sm" @click="modal = true">
-            <q-input outlined v-model="selected.consumo.lecant" label="Anterior lectura" readonly/>
+            <q-input outlined v-model="selected.consumo.lecact" label="Anterior lectura" readonly/>
           </div>
           <div class="col-8 q-pa-sm">
             <q-input type="number" outlined v-model="selected.lectura" label="Lectura"/>
@@ -61,8 +63,13 @@
       <q-card-actions align="right">
         <q-btn
           flat
+          @click="confirmEnd = true">
+          Terminar
+        </q-btn>
+        <q-btn
+          flat
           @click="confirmSave = true">
-          Guardar
+          Enviar
         </q-btn>
         <q-btn
           flat
@@ -98,12 +105,26 @@
         <q-card-section class="row items-center">
           <q-avatar icon="info" color="primary" text-color="white" />
           <span class="q-ml-sm">
-            ¿Deseas guardar y terminar la ruta, o solo guardar y continuar editando?
+            ENVIAR LECTURAS QUE SE HAN REGISTRADO
           </span>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="Terminar" color="secondary" v-close-popup @click="guardar(true)"/>
-          <q-btn flat label="Guardar" color="primary" v-close-popup @click="guardar()"/>
+          <q-btn flat label="Cancelar" color="secondary" v-close-popup/>
+          <q-btn flat label="Enviar" color="primary" v-close-popup @click="guardar()"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="confirmEnd">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="warning" color="primary" text-color="white" />
+          <span class="q-ml-sm">
+            ¿ESTA SEGURO DE TERMINAR Y HACER CIERRE DE LECTURAS?
+          </span>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="secondary" v-close-popup/>
+          <q-btn flat label="Terminar" color="primary" v-close-popup @click="guardar(true)"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -127,6 +148,7 @@
   const modal = ref(false);
   const confirm = ref(false);
   const confirmSave = ref(false);
+  const confirmEnd = ref(false);
   const dirTemp = ref(1);
   const storeRuta = useRutaStore();
   const storeRutas = useRutasStore();
@@ -137,8 +159,14 @@
   const selected = ref(computed(() => storeLectura.obtener));
   const sectores = ref(computed(() => storeSectores.obtener));
   const sector = ref(sectores.value[0]);
-  const consumo = ref(computed(() => Number(selected.value.lectura) - Number(selected.value.consumo.lecant)));
+  const consumo = ref(computed(() => Number(selected.value.lectura) - Number(selected.value.consumo.lecact)));
   
+  onMounted(() => {
+    if (Array.isArray(ruta.value)) {
+      router.push({ path: '/' })
+    }
+  });
+
   watch(sector, () => {
     const element = ruta.value.lecturas.find((e: any) => e.consumo.sector == sector.value);
     storeLectura.modificar(element);
@@ -158,6 +186,7 @@
     const lectura = ruta.value.lecturas.find((l: any) => l.id == selected.value.id)
     const index = ruta.value.lecturas.indexOf(lectura);
     const nextElement = ruta.value.lecturas[index + direccion];
+    ruta.value.next = nextElement;
     storeRuta.modificar(ruta.value);
     storeLectura.modificar(nextElement || selected.value);
     sector.value = nextElement.consumo.sector;
